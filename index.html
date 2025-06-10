@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>バーコード生成サイト</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a5568;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .tool-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.1);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .tool-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #4a5568;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2d3748;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .generate-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .generate-btn:hover {
+            background: #5a67d8;
+        }
+
+        .generate-btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .barcode-output {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+        }
+
+        .barcode-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .barcode-text {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .barcode-canvas {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+
+        .download-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s ease;
+            margin: 5px;
+        }
+
+        .download-btn:hover {
+            background: #38a169;
+        }
+
+        .settings-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .settings-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>バーコード生成サイト</h1>
+        
+        <div class="tools-grid">
+            <div class="tool-card">
+                <h2 class="tool-title">バーコード生成</h2>
+                
+                <div class="settings-group">
+                    <div class="input-group">
+                        <label for="barcodeFormat">バーコード形式:</label>
+                        <select id="barcodeFormat">
+                            <option value="CODE128">CODE128</option>
+                            <option value="CODE39">CODE39</option>
+                            <option value="EAN13">EAN13</option>
+                            <option value="EAN8">EAN8</option>
+                            <option value="UPC">UPC</option>
+                            <option value="ITF14">ITF14</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="barcodeWidth">幅:</label>
+                        <input type="number" id="barcodeWidth" value="2" min="1" max="5" step="0.1">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="barcodeHeight">高さ:</label>
+                        <input type="number" id="barcodeHeight" value="100" min="50" max="200">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="barcodeInput">バーコード内容（複数の場合は改行で区切る）:</label>
+                    <textarea id="barcodeInput" placeholder="バーコードにしたい内容を入力してください&#10;複数の場合は改行で区切ってください"></textarea>
+                    <div class="error-message" id="errorMessage">有効な内容を入力してください</div>
+                </div>
+                
+                <button class="generate-btn" onclick="generateBarcodes()">バーコードを生成</button>
+                
+                <div class="barcode-output" id="barcodeOutput" style="display: none;">
+                    <h3 style="color: #4a5568; margin-bottom: 15px;">生成されたバーコード:</h3>
+                    <div id="barcodeContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function validateBarcodeData(data, format) {
+            if (!data || data.trim() === '') {
+                return false;
+            }
+
+            switch (format) {
+                case 'EAN13':
+                    return /^\d{13}$/.test(data.replace(/\s/g, ''));
+                case 'EAN8':
+                    return /^\d{8}$/.test(data.replace(/\s/g, ''));
+                case 'UPC':
+                    return /^\d{12}$/.test(data.replace(/\s/g, ''));
+                case 'ITF14':
+                    return /^\d{14}$/.test(data.replace(/\s/g, ''));
+                case 'CODE39':
+                    return /^[A-Z0-9\-\.\$\/\+\%\s]+$/.test(data);
+                case 'CODE128':
+                default:
+                    return data.trim().length > 0;
+            }
+        }
+
+        function generateBarcodes() {
+            const input = document.getElementById('barcodeInput').value;
+            const format = document.getElementById('barcodeFormat').value;
+            const width = parseFloat(document.getElementById('barcodeWidth').value);
+            const height = parseInt(document.getElementById('barcodeHeight').value);
+            
+            if (!input.trim()) {
+                showError('バーコード内容を入力してください');
+                return;
+            }
+
+            const lines = input.split('\n').filter(line => line.trim() !== '');
+            const container = document.getElementById('barcodeContainer');
+            const output = document.getElementById('barcodeOutput');
+            
+            container.innerHTML = '';
+            
+            let successCount = 0;
+            let errorCount = 0;
+
+            lines.forEach((line, index) => {
+                const trimmedLine = line.trim();
+                
+                if (!validateBarcodeData(trimmedLine, format)) {
+                    errorCount++;
+                    const errorItem = document.createElement('div');
+                    errorItem.className = 'barcode-item';
+                    errorItem.style.borderLeft = '4px solid #e53e3e';
+                    errorItem.innerHTML = `
+                        <div class="barcode-text" style="color: #e53e3e;">
+                            エラー: "${trimmedLine}" は ${format} 形式に適合しません
+                        </div>
+                    `;
+                    container.appendChild(errorItem);
+                    return;
+                }
+
+                try {
+                    const canvas = document.createElement('canvas');
+                    const barcodeItem = document.createElement('div');
+                    barcodeItem.className = 'barcode-item';
+                    
+                    JsBarcode(canvas, trimmedLine, {
+                        format: format,
+                        width: width,
+                        height: height,
+                        displayValue: true,
+                        fontSize: 14,
+                        textMargin: 5
+                    });
+                    
+                    barcodeItem.innerHTML = `
+                        <div class="barcode-text">内容: ${trimmedLine}</div>
+                        <div class="barcode-canvas-container"></div>
+                        <div>
+                            <button class="download-btn" onclick="downloadBarcode(this, '${trimmedLine}')">PNG でダウンロード</button>
+                        </div>
+                    `;
+                    
+                    const canvasContainer = barcodeItem.querySelector('.barcode-canvas-container');
+                    canvas.className = 'barcode-canvas';
+                    canvasContainer.appendChild(canvas);
+                    
+                    container.appendChild(barcodeItem);
+                    successCount++;
+                    
+                } catch (error) {
+                    errorCount++;
+                    const errorItem = document.createElement('div');
+                    errorItem.className = 'barcode-item';
+                    errorItem.style.borderLeft = '4px solid #e53e3e';
+                    errorItem.innerHTML = `
+                        <div class="barcode-text" style="color: #e53e3e;">
+                            エラー: "${trimmedLine}" の生成に失敗しました
+                        </div>
+                    `;
+                    container.appendChild(errorItem);
+                }
+            });
+            
+            if (successCount > 0) {
+                output.style.display = 'block';
+                showToast(`${successCount}個のバーコードを生成しました${errorCount > 0 ? ` (${errorCount}個のエラー)` : ''}`);
+            } else {
+                showError('バーコードの生成に失敗しました');
+            }
+        }
+
+        function downloadBarcode(button, filename) {
+            const canvas = button.parentElement.parentElement.querySelector('canvas');
+            const link = document.createElement('a');
+            link.download = `barcode_${filename.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+            showToast('バーコードをダウンロードしました');
+        }
+
+        // Enter キーでの生成をサポート
+        document.getElementById('barcodeInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                generateBarcodes();
+            }
+        });
+
+        // 形式変更時のバリデーション更新
+        document.getElementById('barcodeFormat').addEventListener('change', function() {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
