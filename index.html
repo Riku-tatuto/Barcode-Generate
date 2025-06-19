@@ -50,13 +50,14 @@
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: box-shadow 0.3s ease;
             border: 1px solid rgba(102, 126, 234, 0.1);
+            position: relative;
         }
 
         .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            /* transform: translateY(-5px); 削除 */
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
         }
 
         .tool-title {
@@ -79,7 +80,7 @@
             color: #2d3748;
         }
 
-        input[type="text"], textarea {
+        input[type="text"], textarea, select {
             width: 100%;
             padding: 10px;
             border: 2px solid #e2e8f0;
@@ -87,6 +88,13 @@
             font-size: 14px;
             transition: border-color 0.3s ease;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: white;
+        }
+
+        input[type="text"]:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         textarea {
@@ -94,7 +102,28 @@
             resize: vertical;
         }
 
-        input[type="text"]:focus, textarea:focus {
+        /* 数値入力欄をセレクト風に統一 */
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            appearance: none;
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            position: relative;
+            background: white;
+            transition: border-color 0.3s ease;
+        }
+        /* Chrome のスピンボタン非表示 */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"]:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -179,15 +208,6 @@
             border-radius: 10px;
         }
 
-        select {
-            width: 100%;
-            padding: 8px;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 14px;
-            background: white;
-        }
-
         .toast {
             position: fixed;
             top: 20px;
@@ -218,11 +238,9 @@
                 padding: 20px;
                 margin: 10px;
             }
-            
             h1 {
                 font-size: 2rem;
             }
-            
             .settings-group {
                 grid-template-columns: 1fr;
             }
@@ -232,11 +250,9 @@
 <body>
     <div class="container">
         <h1>バーコード生成サイト</h1>
-        
         <div class="tools-grid">
             <div class="tool-card">
                 <h2 class="tool-title">バーコード生成</h2>
-                
                 <div class="settings-group">
                     <div class="input-group">
                         <label for="barcodeFormat">バーコード形式:</label>
@@ -249,26 +265,21 @@
                             <option value="ITF14">ITF14</option>
                         </select>
                     </div>
-                    
                     <div class="input-group">
                         <label for="barcodeWidth">幅:</label>
                         <input type="number" id="barcodeWidth" value="2" min="1" max="5" step="0.1">
                     </div>
-                    
                     <div class="input-group">
                         <label for="barcodeHeight">高さ:</label>
-                        <input type="number" id="barcodeHeight" value="100" min="50" max="200">
+                        <input type="number" id="barcodeHeight" value="100" min="50" max="200">...
                     </div>
                 </div>
-                
                 <div class="input-group">
                     <label for="barcodeInput">バーコード内容（複数の場合は改行で区切る）:</label>
-                    <textarea id="barcodeInput" placeholder="バーコードにしたい内容を入力してください&#10;複数の場合は改行で区切ってください"></textarea>
+                    <textarea id="barcodeInput" placeholder="バーコードにしたい内容を入力してください\n複数の場合は改行で区切ってください"></textarea>
                     <div class="error-message" id="errorMessage">有効な内容を入力してください</div>
                 </div>
-                
                 <button class="generate-btn" onclick="generateBarcodes()">バーコードを生成</button>
-                
                 <div class="barcode-output" id="barcodeOutput" style="display: none;">
                     <h3 style="color: #4a5568; margin-bottom: 15px;">生成されたバーコード:</h3>
                     <div id="barcodeContainer"></div>
@@ -276,159 +287,55 @@
             </div>
         </div>
     </div>
-
     <div class="toast" id="toast"></div>
-
     <script>
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
-
         function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
+            const err = document.getElementById('errorMessage');
+            err.textContent = message;
+            err.style.display = 'block';
+            setTimeout(() => err.style.display = 'none', 5000);
         }
-
-        function validateBarcodeData(data, format) {
-            if (!data || data.trim() === '') {
-                return false;
-            }
-
-            switch (format) {
-                case 'EAN13':
-                    return /^\d{13}$/.test(data.replace(/\s/g, ''));
-                case 'EAN8':
-                    return /^\d{8}$/.test(data.replace(/\s/g, ''));
-                case 'UPC':
-                    return /^\d{12}$/.test(data.replace(/\s/g, ''));
-                case 'ITF14':
-                    return /^\d{14}$/.test(data.replace(/\s/g, ''));
-                case 'CODE39':
-                    return /^[A-Z0-9\-\.\$\/\+\%\s]+$/.test(data);
-                case 'CODE128':
-                default:
-                    return data.trim().length > 0;
+        function validateBarcodeData(data, fmt) {
+            if (!data.trim()) return false;
+            switch (fmt) {
+                case 'EAN13': return /^\d{13}$/.test(data);
+                case 'EAN8':  return /^\d{8}$/.test(data);
+                case 'UPC':   return /^\d{12}$/.test(data);
+                case 'ITF14': return /^\d{14}$/.test(data);
+                case 'CODE39': return /^[A-Z0-9\-\.\/\+\%\s]+$/.test(data);
+                default: return true;
             }
         }
-
         function generateBarcodes() {
-            const input = document.getElementById('barcodeInput').value;
-            const format = document.getElementById('barcodeFormat').value;
-            const width = parseFloat(document.getElementById('barcodeWidth').value);
-            const height = parseInt(document.getElementById('barcodeHeight').value);
-            
-            if (!input.trim()) {
-                showError('バーコード内容を入力してください');
-                return;
-            }
-
-            const lines = input.split('\n').filter(line => line.trim() !== '');
+            const lines = document.getElementById('barcodeInput').value.split('\n').filter(l => l.trim());
+            const fmt = document.getElementById('barcodeFormat').value;
+            const w = parseFloat(document.getElementById('barcodeWidth').value);
+            const h = parseInt(document.getElementById('barcodeHeight').value, 10);
+            if (lines.length === 0) { showError('バーコード内容を入力してください'); return; }
             const container = document.getElementById('barcodeContainer');
-            const output = document.getElementById('barcodeOutput');
-            
             container.innerHTML = '';
-            
-            let successCount = 0;
-            let errorCount = 0;
-
-            lines.forEach((line, index) => {
-                const trimmedLine = line.trim();
-                
-                if (!validateBarcodeData(trimmedLine, format)) {
-                    errorCount++;
-                    const errorItem = document.createElement('div');
-                    errorItem.className = 'barcode-item';
-                    errorItem.style.borderLeft = '4px solid #e53e3e';
-                    errorItem.innerHTML = `
-                        <div class="barcode-text" style="color: #e53e3e;">
-                            エラー: "${trimmedLine}" は ${format} 形式に適合しません
-                        </div>
-                    `;
-                    container.appendChild(errorItem);
-                    return;
-                }
-
-                try {
-                    const canvas = document.createElement('canvas');
-                    const barcodeItem = document.createElement('div');
-                    barcodeItem.className = 'barcode-item';
-                    
-                    JsBarcode(canvas, trimmedLine, {
-                        format: format,
-                        width: width,
-                        height: height,
-                        displayValue: true,
-                        fontSize: 14,
-                        textMargin: 5
-                    });
-                    
-                    barcodeItem.innerHTML = `
-                        <div class="barcode-text">内容: ${trimmedLine}</div>
-                        <div class="barcode-canvas-container"></div>
-                        <div>
-                            <button class="download-btn" onclick="downloadBarcode(this, '${trimmedLine}')">PNG でダウンロード</button>
-                        </div>
-                    `;
-                    
-                    const canvasContainer = barcodeItem.querySelector('.barcode-canvas-container');
-                    canvas.className = 'barcode-canvas';
-                    canvasContainer.appendChild(canvas);
-                    
-                    container.appendChild(barcodeItem);
-                    successCount++;
-                    
-                } catch (error) {
-                    errorCount++;
-                    const errorItem = document.createElement('div');
-                    errorItem.className = 'barcode-item';
-                    errorItem.style.borderLeft = '4px solid #e53e3e';
-                    errorItem.innerHTML = `
-                        <div class="barcode-text" style="color: #e53e3e;">
-                            エラー: "${trimmedLine}" の生成に失敗しました
-                        </div>
-                    `;
-                    container.appendChild(errorItem);
+            let ok=0, err=0;
+            lines.forEach(txt => {
+                if (!validateBarcodeData(txt, fmt)) { err++; const div = document.createElement('div'); div.className='barcode-item'; div.style.borderLeft='4px solid #e53e3e'; div.innerHTML=`<div class="barcode-text" style="color:#e53e3e;">エラー: ${txt} は ${fmt} 形式に適合しません</div>`; container.appendChild(div);
+                } else {
+                    ok++; const canvas = document.createElement('canvas'); JsBarcode(canvas, txt, { format: fmt, width: w, height: h, displayValue: true, fontSize:14, textMargin:5 }); const div = document.createElement('div'); div.className='barcode-item'; div.innerHTML=`<div class="barcode-text">内容: ${txt}</div><div class="barcode-canvas-container"></div><button class="download-btn" onclick="downloadBarcode(this,'${txt}')">PNG でダウンロード</button>`; div.querySelector('.barcode-canvas-container').appendChild(canvas); container.appendChild(div);
                 }
             });
-            
-            if (successCount > 0) {
-                output.style.display = 'block';
-                showToast(`${successCount}個のバーコードを生成しました${errorCount > 0 ? ` (${errorCount}個のエラー)` : ''}`);
-            } else {
-                showError('バーコードの生成に失敗しました');
-            }
+            const output = document.getElementById('barcodeOutput');
+            if (ok) { output.style.display='block'; showToast(`${ok} 個のバーコードを生成しました${err?`（${err} 個エラー）`:''}`); }
+            else { showError('バーコードの生成に失敗しました'); }
         }
-
-        function downloadBarcode(button, filename) {
-            const canvas = button.parentElement.parentElement.querySelector('canvas');
-            const link = document.createElement('a');
-            link.download = `barcode_${filename.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
-            link.href = canvas.toDataURL();
-            link.click();
-            showToast('バーコードをダウンロードしました');
+        function downloadBarcode(btn, name) {
+            const c = btn.parentElement.querySelector('canvas'); const link = document.createElement('a'); link.download = `barcode_${name.replace(/[^\w]/g,'_')}.png`; link.href = c.toDataURL(); link.click(); showToast('バーコードをダウンロードしました');
         }
-
-        // Enter キーでの生成をサポート
-        document.getElementById('barcodeInput').addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                generateBarcodes();
-            }
-        });
-
-        // 形式変更時のバリデーション更新
-        document.getElementById('barcodeFormat').addEventListener('change', function() {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.style.display = 'none';
-        });
+        document.getElementById('barcodeInput').addEventListener('keydown', e => { if (e.ctrlKey && e.key==='Enter') generateBarcodes(); });
+        document.getElementById('barcodeFormat').addEventListener('change', () => document.getElementById('errorMessage').style.display='none');
     </script>
 </body>
 </html>
