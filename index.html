@@ -7,7 +7,6 @@
     <title>2Dコード生成サイト</title>
     <meta name="description" content="バーコードやQRコードを簡単に生成できるサイトです。画面から直接バーコードリーダーで読み取れます。">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
-    <!-- より安定したqrcode-generatorライブラリに変更 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
     <style>
         * {
@@ -42,7 +41,6 @@
             font-weight: 700;
         }
 
-        /* タブ切り替え */
         .tab-container {
             display: flex;
             gap: 0;
@@ -284,16 +282,6 @@
             border-radius: 10px;
         }
 
-        .size-preview {
-            margin-top: 8px;
-            padding: 8px 12px;
-            background: #eef0ff;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #667eea;
-            text-align: center;
-        }
-
         .toast {
             position: fixed;
             top: 20px;
@@ -331,57 +319,6 @@
             font-size: 12px;
             color: #718096;
             margin-top: 4px;
-        }
-
-        /* デバッグパネル */
-        .debug-panel {
-            margin-top: 20px;
-            padding: 15px;
-            background: #1a202c;
-            border-radius: 8px;
-            color: #68d391;
-            font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 12px;
-            max-height: 300px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .debug-panel.show {
-            display: block;
-        }
-
-        .debug-toggle {
-            margin-top: 10px;
-            padding: 8px 15px;
-            background: #2d3748;
-            color: #a0aec0;
-            border: 1px solid #4a5568;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .debug-toggle:hover {
-            background: #4a5568;
-            color: white;
-        }
-
-        .debug-entry {
-            padding: 4px 0;
-            border-bottom: 1px solid #2d3748;
-        }
-
-        .debug-entry.error {
-            color: #fc8181;
-        }
-
-        .debug-entry.success {
-            color: #68d391;
-        }
-
-        .debug-entry.info {
-            color: #63b3ed;
         }
 
         @media (max-width: 768px) {
@@ -422,7 +359,6 @@
     <div class="container">
         <h1>2Dコード生成サイト</h1>
 
-        <!-- タブ切り替え -->
         <div class="tab-container">
             <button class="tab-btn active" onclick="switchTab('barcode')" id="tabBarcode">バーコード</button>
             <button class="tab-btn" onclick="switchTab('qrcode')" id="tabQrcode">QRコード</button>
@@ -446,10 +382,8 @@
                             </select>
                         </div>
                         <div class="input-group">
-                            <label for="barcodeScale">表示倍率: <span class="range-value"
-                                    id="barcodeScaleValue">1.0x</span></label>
-                            <input type="range" id="barcodeScale" value="1.0" min="0.5" max="4.0" step="0.1"
-                                oninput="updateBarcodeScale()">
+                            <label for="barcodeScale">表示倍率: <span class="range-value" id="barcodeScaleValue">1.0x</span></label>
+                            <input type="range" id="barcodeScale" value="1.0" min="0.5" max="4.0" step="0.1" oninput="updateBarcodeScale()">
                             <div class="hint-text">画面から直接読み取る場合は大きめに設定してください</div>
                         </div>
                         <div class="input-group">
@@ -482,10 +416,8 @@
                     <h2 class="tool-title">QRコード生成</h2>
                     <div class="settings-group">
                         <div class="input-group">
-                            <label for="qrSize">QRコードサイズ: <span class="range-value"
-                                    id="qrSizeValue">256px</span></label>
-                            <input type="range" id="qrSize" value="256" min="128" max="1024" step="32"
-                                oninput="updateQrSize()">
+                            <label for="qrSize">QRコードサイズ: <span class="range-value" id="qrSizeValue">256px</span></label>
+                            <input type="range" id="qrSize" value="256" min="128" max="1024" step="32" oninput="updateQrSize()">
                             <div class="hint-text">画面から直接読み取る場合は大きめ（512px以上）がおすすめです</div>
                         </div>
                         <div class="input-group">
@@ -499,13 +431,11 @@
                         </div>
                         <div class="input-group">
                             <label for="qrColor">コード色:</label>
-                            <input type="color" id="qrColor" value="#000000"
-                                style="width: 100%; height: 40px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
+                            <input type="color" id="qrColor" value="#000000" style="width: 100%; height: 40px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
                         </div>
                         <div class="input-group">
                             <label for="qrBgColor">背景色:</label>
-                            <input type="color" id="qrBgColor" value="#ffffff"
-                                style="width: 100%; height: 40px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
+                            <input type="color" id="qrBgColor" value="#ffffff" style="width: 100%; height: 40px; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer;">
                         </div>
                     </div>
                     <div class="input-group">
@@ -514,8 +444,6 @@
                         <div class="error-message" id="qrErrorMessage">有効な内容を入力してください</div>
                     </div>
                     <button class="generate-btn" onclick="generateQRCodes()">QRコードを生成</button>
-                    <button class="debug-toggle" onclick="toggleDebug()">デバッグパネル表示/非表示</button>
-                    <div class="debug-panel" id="debugPanel"></div>
                     <div class="code-output" id="qrOutput" style="display: none;">
                         <h3 style="color: #4a5568; margin-bottom: 15px;">生成されたQRコード:</h3>
                         <div class="code-grid" id="qrContainer"></div>
@@ -526,43 +454,10 @@
     </div>
     <div class="toast" id="toast"></div>
     <script>
-        /* ========== デバッグ機能 ========== */
-        let debugMode = false;
-        const debugLogs = [];
-
-        function toggleDebug() {
-            debugMode = !debugMode;
-            const panel = document.getElementById('debugPanel');
-            panel.classList.toggle('show', debugMode);
-        }
-
-        function debugLog(message, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const entry = { timestamp, message, type };
-            debugLogs.push(entry);
-
-            if (debugMode) {
-                const panel = document.getElementById('debugPanel');
-                const div = document.createElement('div');
-                div.className = `debug-entry ${type}`;
-                div.textContent = `[${timestamp}] ${message}`;
-                panel.appendChild(div);
-                panel.scrollTop = panel.scrollHeight;
-            }
-
-            console.log(`[${type.toUpperCase()}] ${message}`);
-        }
-
-        function clearDebug() {
-            debugLogs.length = 0;
-            document.getElementById('debugPanel').innerHTML = '';
-        }
-
         /* ========== タブ切り替え ========== */
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-
             document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
             document.getElementById('content-' + tab).classList.add('active');
         }
@@ -631,7 +526,6 @@
                     div.classList.add('error');
                     div.innerHTML = `<div class="code-text">エラー: ${txt} は ${fmt} 形式に適合しません</div>`;
                 } else {
-                    ok++;
                     const canvas = document.createElement('canvas');
                     try {
                         JsBarcode(canvas, txt, {
@@ -642,7 +536,7 @@
                             fontSize: Math.round(14 * scale),
                             textMargin: 5
                         });
-
+                        ok++;
                         div.innerHTML = `
                             <div class="code-text">内容: ${txt}</div>
                             <div class="code-canvas-container"></div>
@@ -668,32 +562,16 @@
             }
         }
 
-        /* ========== QRコード (qrcode-generator使用) ========== */
-        function utf8ByteLength(str) {
-            let len = 0;
-            for (let i = 0; i < str.length; i++) {
-                const code = str.charCodeAt(i);
-                if (code <= 0x7F) len += 1;
-                else if (code <= 0x7FF) len += 2;
-                else if (code >= 0xD800 && code <= 0xDBFF) { len += 4; i++; }
-                else len += 3;
-            }
-            return len;
-        }
-
+        /* ========== QRコード ========== */
         function generateQRCodes() {
-            clearDebug();
             const lines = document.getElementById('qrInput').value.split('\n').filter(l => l.trim());
             const size = parseInt(document.getElementById('qrSize').value, 10);
             const errorLevel = document.getElementById('qrErrorLevel').value;
             const color = document.getElementById('qrColor').value;
             const bgColor = document.getElementById('qrBgColor').value;
 
-            debugLog(`設定: サイズ=${size}px, 誤り訂正=${errorLevel}, 色=${color}, 背景=${bgColor}`, 'info');
-
             if (lines.length === 0) {
                 showError('qrErrorMessage', 'QRコード内容を入力してください');
-                debugLog('エラー: 入力が空です', 'error');
                 return;
             }
 
@@ -701,27 +579,15 @@
             container.innerHTML = '';
             let ok = 0, errCount = 0;
 
-            lines.forEach((txt, index) => {
+            lines.forEach(txt => {
                 const trimmedText = txt.trim();
                 const div = document.createElement('div');
                 div.className = 'code-item';
 
-                debugLog(`--- 処理中 [${index + 1}]: "${trimmedText}" ---`, 'info');
-                debugLog(`文字数: ${trimmedText.length}, UTF-8バイト数: ${utf8ByteLength(trimmedText)}`, 'info');
-
                 try {
-                    // qrcode-generatorを使用
-                    // typeNumber 0 = 自動選択
-                    const typeNumber = 0;
-                    const errorCorrectionLevel = errorLevel;
-
-                    debugLog(`QRコード生成開始: typeNumber=${typeNumber}, errorLevel=${errorCorrectionLevel}`, 'info');
-
-                    const qr = qrcode(typeNumber, errorCorrectionLevel);
-                    qr.addData(trimmedText, 'Byte');  // Byteモードで日本語をUTF-8として処理
+                    const qr = qrcode(0, errorLevel);
+                    qr.addData(trimmedText, 'Byte');
                     qr.make();
-
-                    debugLog(`QRコード生成成功: モジュール数=${qr.getModuleCount()}`, 'success');
 
                     const label = document.createElement('div');
                     label.className = 'code-text';
@@ -731,7 +597,6 @@
                     const qrContainer = document.createElement('div');
                     qrContainer.className = 'code-canvas-container';
 
-                    // Canvasで描画（色カスタマイズ対応）
                     const canvas = document.createElement('canvas');
                     const moduleCount = qr.getModuleCount();
                     const cellSize = Math.floor(size / moduleCount);
@@ -769,13 +634,10 @@
                     div.appendChild(dlBtn);
 
                     ok++;
-                    debugLog(`[${index + 1}] 完了: "${trimmedText}"`, 'success');
                 } catch (error) {
                     errCount++;
                     div.classList.add('error');
-                    div.innerHTML = `<div class="code-text">エラー: ${trimmedText} の生成に失敗しました<br><small>${error.message}</small></div>`;
-                    debugLog(`[${index + 1}] 失敗: "${trimmedText}" - ${error.message}`, 'error');
-                    debugLog(`スタックトレース: ${error.stack}`, 'error');
+                    div.innerHTML = `<div class="code-text">エラー: ${trimmedText} の生成に失敗しました</div>`;
                 }
 
                 container.appendChild(div);
@@ -785,10 +647,8 @@
             if (ok > 0) {
                 output.style.display = 'block';
                 showToast(`${ok} 個のQRコードを生成しました${errCount ? `（${errCount} 個エラー）` : ''}`);
-                debugLog(`完了: ${ok}個成功, ${errCount}個失敗`, ok > 0 ? 'success' : 'error');
             } else {
                 showError('qrErrorMessage', 'QRコードの生成に失敗しました');
-                debugLog('全て失敗しました', 'error');
             }
         }
 
